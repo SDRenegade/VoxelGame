@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Class-Path: lwjgl-assimp-3.3.3.jar lwjgl-assimp-3.3.3-natives-windows.ja
+ r lwjgl-glfw-3.3.3.jar lwjgl-glfw-3.3.3-natives-windows.jar lwjgl-nfd-3
+ .3.3.jar lwjgl-nfd-3.3.3-natives-windows.jar lwjgl-openal-3.3.3.jar lwj
+ gl-openal-3.3.3-natives-windows.jar lwjgl-opengl-3.3.3.jar lwjgl-opengl
+ -3.3.3-natives-windows.jar lwjgl-stb-3.3.3.jar lwjgl-stb-3.3.3-natives-
+ windows.jar lwjgl-3.3.3.jar lwjgl-3.3.3-natives-windows.jar joml-1.10.5
+ .jar jnoise-pipeline-4.1.0.jar jnoise-transformers-4.1.0.jar jnoise-gen
+ erators-4.1.0.jar jnoise-modules-4.1.0.jar jnoise-modifiers-4.1.0.jar j
+ noise-core-4.1.0.jar jspecify-0.3.0.jar
+Main-Class: main.Main
+
