@@ -8,11 +8,11 @@ Before starting to build the application make sure you have java installed by go
 3) Lastly, in the command prompt execute the command: java -jar VoxelGame-1.0-SNAPSHOT.jar
 
 # Controls
-Movement: WASD
-Fly upwards: Space
-Fly downwards: Left Shift
-Break Blocks: LMB
-Close Application: Escape
+- Movement: WASD
+- Fly upwards: Space
+- Fly downwards: Left Shift
+- Break Blocks: LMB
+- Close Application: Escape
 
 # Current Features
 - Infinite procedural terrain based on 2D and 3D perlin noise
