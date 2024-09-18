@@ -12,8 +12,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL12.glTexImage3D;
 import static org.lwjgl.opengl.GL12.glTexSubImage3D;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL30.GL_TEXTURE_2D_ARRAY;
 import static org.lwjgl.stb.STBImage.*;
 
@@ -43,17 +42,30 @@ public class AssetPool {
         uiShader.compile();
         shaders.put(ShaderType.UI, uiShader);
 
-        // Loading Textures
+        Shader blockOutlineShader = new Shader(
+                "assets/shaders/vBlockOutline.glsl",
+                "assets/shaders/fBlockOutline.glsl");
+        blockOutlineShader.compile();
+        shaders.put(ShaderType.BLOCK_OUTLINE, blockOutlineShader);
+
+        // Load Block Textures
         List<String> texturePaths = new ArrayList<>();
         for(BlockTextures values : BlockTextures.values())
             texturePaths.add(values.getTexturePath());
-        createTextureArray(texturePaths, GL_TEXTURE0);
+        createTextureArray(texturePaths, GL_TEXTURE0, false);
 
-        //TODO Load UI textures
+        // Load UI Textures
+        texturePaths.clear();
+        texturePaths.add("assets/textures/crosshairs.png");
+        createTextureArray(texturePaths, GL_TEXTURE1, true);
+
+        texturePaths = null;
     }
 
-    private void createTextureArray(List<String> filePaths, int glTextureSlotID)
+    private void createTextureArray(List<String> filePaths, int glTextureSlotID, boolean hasAlphaChannel)
     {
+        int colorFormat = hasAlphaChannel ? GL_RGBA : GL_RGB;
+
         glActiveTexture(glTextureSlotID);
 
         blockTextureArrayID = glGenTextures();
@@ -72,11 +84,11 @@ public class AssetPool {
         // their origin at the top right, we need to tell stbi to vertically flip the texture.
         stbi_set_flip_vertically_on_load(true);
         ByteBuffer image = stbi_load(filePaths.get(0), width, height, channels, 0);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB, width.get(0), height.get(0), filePaths.size(), 0, GL_RGB, GL_UNSIGNED_BYTE, GL_NONE);
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width.get(0), height.get(0), 1, GL_RGB, GL_UNSIGNED_BYTE, image);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, colorFormat, width.get(0), height.get(0), filePaths.size(), 0, colorFormat, GL_UNSIGNED_BYTE, GL_NONE);
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width.get(0), height.get(0), 1, colorFormat, GL_UNSIGNED_BYTE, image);
         for(int i = 1; i < filePaths.size(); i++) {
             image = stbi_load(filePaths.get(i), width, height, channels, 0);
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width.get(0), height.get(0), 1, GL_RGB, GL_UNSIGNED_BYTE, image);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width.get(0), height.get(0), 1, colorFormat, GL_UNSIGNED_BYTE, image);
         }
 
         // Freeing memory utilized by stbi library

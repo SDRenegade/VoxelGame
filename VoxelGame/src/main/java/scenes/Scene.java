@@ -1,7 +1,7 @@
 package scenes;
 
 import components.Camera;
-import main.GameObject;
+import window.GameObject;
 import renderer.Renderer;
 
 import java.util.ArrayList;

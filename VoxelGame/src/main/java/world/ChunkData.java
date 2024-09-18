@@ -47,11 +47,6 @@ public class ChunkData {
                 }
             }
         }
-
-        // Temp Cobblestone chunk pillars
-        /*for(int y = 0; y < CHUNK_HEIGHT; y++) {
-            blocks[0 + (0 * CHUNK_SIZE) + (y * CHUNK_SIZE * CHUNK_SIZE)] = 4;
-        }*/
     }
 
     private float noiseEvaluationWorld3D(int x, int y, int z, World world)

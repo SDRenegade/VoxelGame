@@ -107,22 +107,22 @@ public class Shader {
         glUseProgram(0);
     }
 
-    public void uploadBool(String uniformName, boolean value)
+    public void loadUniform(String uniformName, boolean value)
     {
         glUniform1i(glGetUniformLocation(shaderProgramID, uniformName), value ? 1 : 0);
     }
 
-    public void uploadInt(String uniformName, int value)
+    public void loadUniform(String uniformName, int value)
     {
         glUniform1i(glGetUniformLocation(shaderProgramID, uniformName), value);
     }
 
-    public void uploadFloat(String uniformName, float value)
+    public void loadUniform(String uniformName, float value)
     {
         glUniform1f(glGetUniformLocation(shaderProgramID, uniformName), value);
     }
 
-    public void uploadMatrix4f(String uniformName, Matrix4f matrix)
+    public void loadUniform(String uniformName, Matrix4f matrix)
     {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, uniformName), false, matrix.get(new float[16]));
     }

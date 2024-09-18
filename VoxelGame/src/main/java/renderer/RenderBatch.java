@@ -62,8 +62,8 @@ public class RenderBatch {
 
         // Enable buffer attribute pointers
         glVertexAttribPointer(0, POS_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, POS_OFFSET);
-        glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, TEX_COORDS_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, TEX_COORDS_OFFSET);
+        glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
         shader.use();
@@ -105,9 +105,9 @@ public class RenderBatch {
 
         shader.use();
 
-        shader.uploadInt("texture_array", 0);
-        shader.uploadMatrix4f("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
-        shader.uploadMatrix4f("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
+        shader.loadUniform("texture_array", 0);
+        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
+        shader.loadUniform("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
 
         glBindVertexArray(vaoID);
         glEnableVertexAttribArray(0);

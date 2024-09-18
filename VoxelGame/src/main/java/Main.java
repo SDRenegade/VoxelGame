@@ -1,4 +1,4 @@
-package main;
+import window.Window;
 
 public class Main {
 

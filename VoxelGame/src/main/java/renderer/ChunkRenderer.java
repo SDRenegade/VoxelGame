@@ -119,11 +119,10 @@ public class ChunkRenderer {
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
 
         // Create and upload indices buffer
-        eboID = glGenBuffers();
         indices = generateIndices();
+        eboID = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
-        indices = null;
 
         isInitialized = true;
     }
@@ -147,7 +146,7 @@ public class ChunkRenderer {
         glEnableVertexAttribArray(2);
         glEnableVertexAttribArray(3);
 
-        glDrawElements(GL_TRIANGLES, vertices.length / 4, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -161,9 +160,9 @@ public class ChunkRenderer {
 
         int faceOffset = faceIndex * 3 * 4;
         for(int i = 0; i < 4; i++) {
-            vertexList.add((float)chunk.getChunkData().getXPos() * ChunkData.CHUNK_SIZE + chunkX + Block.POSITION_ARRAY[faceOffset + (i * 3)]);
-            vertexList.add((float)chunkY + Block.POSITION_ARRAY[faceOffset + (i * 3) + 1]);
-            vertexList.add((float)chunk.getChunkData().getZPos() * ChunkData.CHUNK_SIZE + chunkZ + Block.POSITION_ARRAY[faceOffset + (i * 3) + 2]);
+            vertexList.add((float)chunk.getChunkData().getXPos() * ChunkData.CHUNK_SIZE + chunkX + Block.CUBE_VERTICES[faceOffset + (i * 3)]);
+            vertexList.add((float)chunkY + Block.CUBE_VERTICES[faceOffset + (i * 3) + 1]);
+            vertexList.add((float)chunk.getChunkData().getZPos() * ChunkData.CHUNK_SIZE + chunkZ + Block.CUBE_VERTICES[faceOffset + (i * 3) + 2]);
 
             vertexList.add(Block.TEXTURE_COORDS_ARRAY[i * 2]);
             vertexList.add(Block.TEXTURE_COORDS_ARRAY[(i * 2) + 1]);

@@ -2,5 +2,6 @@ package util;
 
 public enum ShaderType {
     DEFAULT,
-    UI
+    UI,
+    BLOCK_OUTLINE
 }

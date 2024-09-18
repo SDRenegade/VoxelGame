@@ -6,47 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Block {
-    // Used for rendering individual blocks
-    public static final float[] VERTEX_ARRAY = {
-            // Position           // Tex Coords with z index
-            // Front face
-             0.0f, -1.0f,  1.0f,    0.0f, 0.0f,    1f,
-             0.0f,  0.0f,  1.0f,    0.0f, 1.0f,    1f,
-             1.0f,  0.0f,  1.0f,    1.0f, 1.0f,    1f,
-             1.0f, -1.0f,  1.0f,    1.0f, 0.0f,    1f,
-
-            // Back face
-             1.0f, -1.0f,  0.0f,    0.0f, 0.0f,    1f,
-             1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    1f,
-             0.0f,  0.0f,  0.0f,    1.0f, 1.0f,    1f,
-             0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    1f,
-
-            // Left face
-             0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    1f,
-             0.0f,  0.0f,  0.0f,    0.0f, 1.0f,    1f,
-             0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    1f,
-             0.0f, -1.0f,  1.0f,    1.0f, 0.0f,    1f,
-
-            // Right face
-             1.0f, -1.0f,  1.0f,    0.0f, 0.0f,    1f,
-             1.0f,  0.0f,  1.0f,    0.0f, 1.0f,    1f,
-             1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    1f,
-             1.0f, -1.0f,  0.0f,    1.0f, 0.0f,    1f,
-
-            // Top face
-             1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0f,
-             1.0f,  0.0f,  1.0f,    0.0f, 1.0f,    0f,
-             0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    0f,
-             0.0f,  0.0f,  0.0f,    1.0f, 0.0f,    0f,
-
-            // Bottom face
-             1.0f, -1.0f,  1.0f,    0.0f, 0.0f,    2f,
-             1.0f, -1.0f,  0.0f,    0.0f, 1.0f,    2f,
-             0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    2f,
-             0.0f, -1.0f,  1.0f,    1.0f, 0.0f,    2f,
-    };
-
-    public static float[] POSITION_ARRAY = {
+    public static final float[] CUBE_VERTICES = {
             // Front face
              0.0f, -1.0f,  1.0f, // Bottom left vert
              0.0f,  0.0f,  1.0f, // Top left vert
@@ -84,7 +44,7 @@ public class Block {
              1.0f, -1.0f,  0.0f
     };
 
-    public static float[] TEXTURE_COORDS_ARRAY = {
+    public static final float[] TEXTURE_COORDS_ARRAY = {
             0.0f, 0.0f,
             0.0f, 1.0f,
             1.0f, 1.0f,

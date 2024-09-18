@@ -1,7 +1,7 @@
 package renderer;
 
 import components.QuadRenderer;
-import main.GameObject;
+import window.GameObject;
 
 import java.util.ArrayList;
 import java.util.List;

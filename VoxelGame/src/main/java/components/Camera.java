@@ -1,14 +1,14 @@
 package components;
 
-import main.Window;
+import window.Window;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 
-import main.KeyListener;
-import main.MouseListener;
+import window.KeyListener;
+import window.MouseListener;
 import world.ChunkData;
 
 public class Camera extends Component {
@@ -27,7 +27,7 @@ public class Camera extends Component {
         camPos = new Vector3f(0f, 155f, 3f);
         camForward = new Vector3f(0f, 0f, -1f);
         camUp = new Vector3f(0f, 1f, 0f);
-        camSpeed = 15f;
+        camSpeed = 10f;
         yaw = -90;
         pitch = 0;
         lastX = 0;
@@ -39,9 +39,9 @@ public class Camera extends Component {
     public void update(double dt)
     {
         if(KeyListener.isKeyPressed(GLFW_KEY_W))
-            camPos.add(new Vector3f(camForward).mul((float)(camSpeed * dt)));
+            camPos.add(new Vector3f(camForward.x, 0f, camForward.z).normalize().mul((float)(camSpeed * dt)));
         if(KeyListener.isKeyPressed(GLFW_KEY_S))
-            camPos.sub(new Vector3f(camForward).mul((float)(camSpeed * dt)));
+            camPos.sub(new Vector3f(camForward.x, 0f, camForward.z).normalize().mul((float)(camSpeed * dt)));
         if(KeyListener.isKeyPressed(GLFW_KEY_A))
             camPos.sub(new Vector3f(camForward).cross(camUp).normalize().mul((float)(camSpeed * dt)));
         if(KeyListener.isKeyPressed(GLFW_KEY_D))
@@ -69,7 +69,7 @@ public class Camera extends Component {
         // Print camera pos to console
         updateTimer -= dt;
         if(updateTimer < 0) {
-            //System.out.println("Cam Position x: " + camPos.x + " y: " + camPos.y + " z: " + camPos.z);
+            System.out.println("Cam Position x: " + camPos.x + " y: " + camPos.y + " z: " + camPos.z);
             int x = camPos.x >= 0 ? (int)(camPos.x / 16) : (int)(camPos.x / ChunkData.CHUNK_SIZE) - 1;
             int z = -64 >= 0 ? (int)(camPos.z / 16) : (int)(camPos.z / ChunkData.CHUNK_SIZE) - 1;
             //System.out.println("Chunk X: " + x + " Chunk Z: " + z);
@@ -77,21 +77,21 @@ public class Camera extends Component {
         }
     }
 
-    public Vector3f getCamPos() { return camPos; }
+    public Vector3f getPos() { return camPos; }
 
-    public void setCamPos(Vector3f camPos) { this.camPos = camPos; }
+    public void setPos(Vector3f camPos) { this.camPos = camPos; }
 
-    public Vector3f getCamForward() { return camForward; }
+    public Vector3f getForward() { return camForward; }
 
-    public void setCamForward(Vector3f camForward) { this.camForward = camForward; }
+    public void setForward(Vector3f camForward) { this.camForward = camForward; }
 
-    public Vector3f getCamUp() { return camUp; }
+    public Vector3f getUp() { return camUp; }
 
-    public void setCamUp(Vector3f camUp) { this.camUp = camUp; }
+    public void setUp(Vector3f camUp) { this.camUp = camUp; }
 
-    public float getCamSpeed() { return camSpeed; }
+    public float getSpeed() { return camSpeed; }
 
-    public void setCamSpeed(float camSpeed) { this.camSpeed = camSpeed; }
+    public void setSpeed(float camSpeed) { this.camSpeed = camSpeed; }
 
     public float getYaw() { return yaw; }
 

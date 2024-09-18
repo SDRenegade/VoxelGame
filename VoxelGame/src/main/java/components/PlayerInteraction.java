@@ -1,90 +1,213 @@
 package components;
 
-import main.MouseListener;
+import window.MouseListener;
+import renderer.Shader;
+import scenes.SceneManager;
+import util.AssetPool;
+import util.ShaderType;
+import util.Vec3f;
+import util.Vec3i;
 import world.World;
 
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+
 public class PlayerInteraction extends Component {
-    private float maxRayCastLength;
+    public static final float OUTLINE_OFFSET = 0.0f;
+    public static final float[] CUBE_OUTLINE_VERTEX_POSITIONS = {
+            // Top edges
+            0.0f - OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+
+            // Side edges
+            0.0f - OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET,  0.0f + OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+
+            // Bottom edges
+            0.0f - OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  1.0f + OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            1.0f + OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET,
+            0.0f - OUTLINE_OFFSET, -1.0f - OUTLINE_OFFSET,  0.0f - OUTLINE_OFFSET
+    };
+    public static final float[] VERTEX_COLOR_FACTORS = {
+            // Top edges
+            2.25f, 1.5f, 1.5f, 0.75f, 0.75f, 1.5f, 1.5f, 2.25f,
+            // Side edges
+            1.5f, 0.75f, 0.75f, 0, 1.5f, 0.75f, 2.25f, 1.5f,
+            // Bottom edges
+            0.75f, 1.5f, 1.5f, 0.75f, 0.75f, 0, 0, 0.75f
+    };
+    private static final int POS_SIZE = 3;
+    private static final int COLOR_FACTOR_SIZE = 1;
+    private static final int POS_OFFSET = 0;
+    private static final int COLOR_FACTOR_OFFSET = POS_SIZE * Float.BYTES + POS_OFFSET;
+    private static final int VERTEX_SIZE = POS_SIZE + COLOR_FACTOR_SIZE;
+    private static final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
+    private static final float DEFAULT_PLAYER_REACH = 5f;
 
     private Camera cam;
     private World world;
+    private float playerReach;
+    private Shader shader;
+    private int vaoID, vboID;
+    private float[] vertices;
 
     @Override
     public void start()
     {
-        maxRayCastLength = 5f;
+        playerReach = DEFAULT_PLAYER_REACH;
+
+        shader = AssetPool.getInstance().getShader(ShaderType.BLOCK_OUTLINE);
+
+        // Generate and bind a VAO
+        vaoID = glGenVertexArrays();
+        glBindVertexArray(vaoID);
     }
 
 
     @Override
     public void update(double dt)
     {
-        if(!MouseListener.mouseButtonDown(0))
-            return;
+        Vec3f rayStepSize = new Vec3f(
+                (float)Math.sqrt(1 + Math.pow(cam.getForward().y / cam.getForward().x, 2) + Math.pow(cam.getForward().z / cam.getForward().x, 2)),
+                (float)Math.sqrt(1 + Math.pow(cam.getForward().x / cam.getForward().y, 2) + Math.pow(cam.getForward().z / cam.getForward().y, 2)),
+                (float)Math.sqrt(1 + Math.pow(cam.getForward().x / cam.getForward().z, 2) + Math.pow(cam.getForward().y / cam.getForward().z, 2))
+        );
+        // Coordinates of the block that the raycast is currently passing through
+        Vec3i worldCoords = new Vec3i(
+                cam.getPos().x >= 0 ? (int)cam.getPos().x : (int)cam.getPos().x - 1,
+                cam.getPos().y >= 0 ? (int)cam.getPos().y + 1 : (int)cam.getPos().y,
+                cam.getPos().z >= 0 ? (int)cam.getPos().z : (int)cam.getPos().z - 1
+        );
+        Vec3i previousPassCoords = new Vec3i();
+        // Stores the length of each axis given their steps
+        Vec3f rayLength1D = new Vec3f();
+        Vec3i step = new Vec3i();
 
-        float startingCellFactorX = cam.getCamPos().x - (float)Math.floor(cam.getCamPos().x);
-        float startingCellFactorY = 1 - (cam.getCamPos().y - (float)Math.floor(cam.getCamPos().y));
-        float startingCellFactorZ = cam.getCamPos().z - (float)Math.floor(cam.getCamPos().z);
-        float sx = (float)Math.sqrt(1 + Math.pow(cam.getCamForward().y / cam.getCamForward().x, 2) + Math.pow(cam.getCamForward().z / cam.getCamForward().x, 2));
-        float sy = (float)Math.sqrt(1 + Math.pow(cam.getCamForward().x / cam.getCamForward().y, 2) + Math.pow(cam.getCamForward().z / cam.getCamForward().y, 2));
-        float sz = (float)Math.sqrt(1 + Math.pow(cam.getCamForward().x / cam.getCamForward().z, 2) + Math.pow(cam.getCamForward().y / cam.getCamForward().z, 2));
-        int xFactor, yFactor, zFactor;
-        xFactor = yFactor = zFactor = 1;
+        // Calculate the starting lengths of each axis
+        if(cam.getForward().x >= 0) {
+            step.x = 1;
+            rayLength1D.x = ((worldCoords.x + 1) - cam.getPos().x) * rayStepSize.x;
+        }
+        else {
+            step.x = -1;
+            rayLength1D.x = (cam.getPos().x - worldCoords.x) * rayStepSize.x;
+        }
 
-        float rayLength = 0f;
-        Byte hitBlock = null;
-        Vector3VG hitBlockCoords = null;
-        while(rayLength <= maxRayCastLength && hitBlockCoords == null) {
-            if(sx * xFactor < sy * yFactor && sx * xFactor < sz * zFactor) {
-                float firstCellLength = (float)Math.sqrt(Math.pow(cam.getCamForward().x * (sx * startingCellFactorX), 2) + Math.pow(cam.getCamForward().y * (sx * startingCellFactorX), 2) + Math.pow(cam.getCamForward().z * (sx * startingCellFactorX), 2));
-                rayLength = xFactor > 1 ? (float)Math.sqrt(Math.pow(cam.getCamForward().x * (sx * (xFactor - 1)), 2) + Math.pow(cam.getCamForward().y * (sx * (xFactor - 1)), 2) + Math.pow(cam.getCamForward().z * (sx * (xFactor - 1)), 2)) + firstCellLength : firstCellLength;
-                xFactor++;
+        if(cam.getForward().y >= 0) {
+            step.y = 1;
+            rayLength1D.y = (worldCoords.y - cam.getPos().y) * rayStepSize.y;
+        }
+        else {
+            step.y = -1;
+            rayLength1D.y = (cam.getPos().y - (worldCoords.y - 1)) * rayStepSize.y;
+        }
+
+        if(cam.getForward().z >= 0) {
+            step.z = 1;
+            rayLength1D.z = ((worldCoords.z + 1) - cam.getPos().z) * rayStepSize.z;
+        }
+        else {
+            step.z = -1;
+            rayLength1D.z = (cam.getPos().z - worldCoords.z) * rayStepSize.z;
+        }
+
+        previousPassCoords.copy(worldCoords);
+        Byte hitBlock = world.getBlock(worldCoords.x, worldCoords.y, worldCoords.z);
+        float distanceTraveled = 0;
+        while((hitBlock == null || hitBlock == 0) && distanceTraveled <= playerReach) {
+            previousPassCoords.copy(worldCoords);
+            if(rayLength1D.x < rayLength1D.y && rayLength1D.x < rayLength1D.z) {
+                worldCoords.x += step.x;
+                distanceTraveled = rayLength1D.x;
+                rayLength1D.x += rayStepSize.x;
             }
-            else if(sy * yFactor < sx * xFactor && sy * yFactor < sz * zFactor) {
-                float firstCellLength = (float)Math.sqrt(Math.pow(cam.getCamForward().x * (sy * startingCellFactorY), 2) + Math.pow(cam.getCamForward().y * (sy * startingCellFactorY), 2) + Math.pow(cam.getCamForward().z * (sy * startingCellFactorY), 2));
-                rayLength = yFactor > 1 ? (float)Math.sqrt(Math.pow(cam.getCamForward().x * (sy * (yFactor - 1)), 2) + Math.pow(cam.getCamForward().y * (sy * (yFactor - 1)), 2) + Math.pow(cam.getCamForward().z * (sy * (yFactor - 1)), 2)) + firstCellLength : firstCellLength;
-                yFactor++;
+            else if (rayLength1D.y < rayLength1D.x && rayLength1D.y < rayLength1D.z) {
+                worldCoords.y += step.y;
+                distanceTraveled = rayLength1D.y;
+                rayLength1D.y += rayStepSize.y;
             }
             else {
-                float firstCellLength = (float)Math.sqrt(Math.pow(cam.getCamForward().x * (sz * startingCellFactorZ), 2) + Math.pow(cam.getCamForward().y * (sz * startingCellFactorZ), 2) + Math.pow(cam.getCamForward().z * (sz * startingCellFactorZ), 2));
-                rayLength = zFactor > 1 ? (float)Math.sqrt(Math.pow(cam.getCamForward().x * (sz * (zFactor - 1)), 2) + Math.pow(cam.getCamForward().y * (sz * (zFactor - 1)), 2) + Math.pow(cam.getCamForward().z * (sz * (zFactor - 1)), 2)) + firstCellLength : firstCellLength;
-                zFactor++;
+                worldCoords.z += step.z;
+                distanceTraveled = rayLength1D.z;
+                rayLength1D.z += rayStepSize.z;
             }
 
-            // Positive coordinates need to be rounded down while negative coordinates need to be rounded up
-            int hitBlockX = cam.getCamPos().x + (cam.getCamForward().x * rayLength) >= 0 ? (int)(cam.getCamPos().x + (cam.getCamForward().x * rayLength)) : (int)(cam.getCamPos().x + (cam.getCamForward().x * rayLength) - 1);
-            int hitBlockY = (int)Math.ceil((cam.getCamPos().y + (cam.getCamForward().y * rayLength)));
-            int hitBlockZ = cam.getCamPos().z + (cam.getCamForward().z * rayLength) >= 0 ? (int)(cam.getCamPos().z + (cam.getCamForward().z * rayLength)) : (int)(cam.getCamPos().z + (cam.getCamForward().z * rayLength) - 1);
-            hitBlock = world.getBlock(hitBlockX, hitBlockY, hitBlockZ);
-            if(hitBlock != null && hitBlock != 0)
-                hitBlockCoords = new Vector3VG(hitBlockX, hitBlockY, hitBlockZ);
+            hitBlock = world.getBlock(worldCoords.x, worldCoords.y, worldCoords.z);
         }
 
-        if(hitBlock != null && hitBlockCoords != null) {
-            //System.out.println("Block interacted at X: " + hitBlockCoords.x + ", Y: " + hitBlockCoords.y + ", Z: " + hitBlockCoords.z);
-            world.setBlock((int)hitBlockCoords.x, (int)hitBlockCoords.y, (int)hitBlockCoords.z, (byte)0);
+        if(hitBlock != null && hitBlock != 0) {
+            if(MouseListener.mouseButtonDown(0))
+                world.setBlock(worldCoords.x, worldCoords.y, worldCoords.z, (byte)0);
+            else if(MouseListener.mouseButtonDown(1) && previousPassCoords != null && world.getBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z) == 0)
+                world.setBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z, (byte)4);
+            else
+                renderBlockOutline(worldCoords);
         }
+    }
+
+    private void renderBlockOutline(Vec3i worldCoords)
+    {
+        vertices = new float[24 * VERTEX_SIZE];
+        for(int i = 0; i < 24; i++) {
+            vertices[i * VERTEX_SIZE] = CUBE_OUTLINE_VERTEX_POSITIONS[i * 3] + worldCoords.x;
+            vertices[i * VERTEX_SIZE + 1] = CUBE_OUTLINE_VERTEX_POSITIONS[i * 3 + 1] + worldCoords.y;
+            vertices[i * VERTEX_SIZE + 2] = CUBE_OUTLINE_VERTEX_POSITIONS[i * 3 + 2] + worldCoords.z;
+            vertices[i * VERTEX_SIZE + 3] = VERTEX_COLOR_FACTORS[i];
+        }
+
+        // Allocate space for the vertices
+        vboID = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vboID);
+        glBufferData(GL_ARRAY_BUFFER, vertices.length * Float.BYTES, GL_DYNAMIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+
+        shader.use();
+        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
+        shader.loadUniform("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
+        shader.loadUniform("sysTime", System.currentTimeMillis() % 10000000);
+
+        glBindVertexArray(vaoID);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vboID);
+
+        // Enable buffer attribute pointers
+        glVertexAttribPointer(0, POS_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, POS_OFFSET);
+        glVertexAttribPointer(1, COLOR_FACTOR_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, COLOR_FACTOR_OFFSET);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+
+        glLineWidth(3f);
+
+        glDrawArrays(GL_LINES, 0, vertices.length / VERTEX_SIZE);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glBindVertexArray(0);
+        shader.detach();
     }
 
     public void setCamera(Camera cam) { this.cam = cam; }
 
     public void setWorld(World world) { this.world = world; }
-
-    public class Vector3VG {
-        public float x;
-        public float y;
-        public float z;
-
-        public Vector3VG(float x, float y, float z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        public Vector3VG mul(float value)
-        {
-            return new Vector3VG(x * value, y * value, z * value);
-        }
-    }
 }

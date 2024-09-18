@@ -1,6 +1,6 @@
 package components;
 
-import main.GameObject;
+import window.GameObject;
 
 public abstract class Component {
     protected GameObject gameObject;
@@ -9,7 +9,7 @@ public abstract class Component {
 
     public void start() {}
 
-    public abstract void update(double dt);
+    public void update(double dt) {}
 
     public GameObject getGameObject() { return gameObject; }
 

@@ -1,6 +1,5 @@
-package main;
+package window;
 
-import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import scenes.SceneManager;
@@ -11,6 +10,9 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
+    private static final int DEFAULT_WINDOW_WIDTH = 960;
+    private static final int DEFAULT_WINDOW_HEIGHT = 540;
+
     private static Window instance;
 
     private int width, height;
@@ -19,8 +21,8 @@ public class Window {
 
     private Window()
     {
-        width = 960;
-        height = 540;
+        width = DEFAULT_WINDOW_WIDTH;
+        height = DEFAULT_WINDOW_HEIGHT;
         title = "Voxel Game main.Window";
     }
 
@@ -78,6 +80,10 @@ public class Window {
         // we want to enable depth testing.
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glEnable(GL_LINE_SMOOTH);
+        // Enabling antialiasing
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -130,6 +136,8 @@ public class Window {
     public String getTitle() { return title; }
 
     public void setTitle(String title) { this.title = title; }
+
+    public static float getAspectRatio() { return (float)getInstance().getWidth() / (float)getInstance().getHeight(); }
 
     public static Window getInstance()
     {

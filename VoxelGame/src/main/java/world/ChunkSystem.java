@@ -10,6 +10,8 @@ import util.ShaderType;
 import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
@@ -123,8 +125,9 @@ public class ChunkSystem {
     public void render()
     {
         shader.use();
-        shader.uploadMatrix4f("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
-        shader.uploadMatrix4f("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
+        shader.loadUniform("textureArray", 0);
+        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
+        shader.loadUniform("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
 
         glBindVertexArray(vaoID);
 

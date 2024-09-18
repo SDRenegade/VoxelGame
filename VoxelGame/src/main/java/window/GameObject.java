@@ -1,6 +1,8 @@
-package main;
+package window;
 
 import components.Component;
+import components.RectTransform;
+import components.Transform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +12,21 @@ public class GameObject {
     private Transform transform;
     private List<Component> components;
 
-    public GameObject(String name)
+    public GameObject(String name, boolean isGuiObject)
     {
-        this(name, new Transform());
+        this.name = name;
+        this.transform = isGuiObject ? new RectTransform() : new Transform();
+        components = new ArrayList<>();
     }
 
     public GameObject(String name, Transform transform)
+    {
+        this.name = name;
+        this.transform = transform;
+        components = new ArrayList<>();
+    }
+
+    public GameObject(String name, RectTransform transform)
     {
         this.name = name;
         this.transform = transform;

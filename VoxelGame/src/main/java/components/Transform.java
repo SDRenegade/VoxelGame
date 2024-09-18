@@ -1,11 +1,12 @@
-package main;
+package components;
 
+import components.Component;
 import org.joml.Vector3f;
 
-public class Transform {
-    private Vector3f position;
-    private Vector3f rotation;
-    private Vector3f scale;
+public class Transform extends Component {
+    protected Vector3f position;
+    protected Vector3f rotation;
+    protected Vector3f scale;
 
     public Transform()
     {
