@@ -12,6 +12,7 @@ public class MouseListener {
     private boolean mouseButtonPressed[];
     private boolean mouseButtonFirstFramePressed[];
     private boolean isDragging;
+    private boolean isFirstPosUpdate;
 
     private MouseListener()
     {
@@ -24,15 +25,17 @@ public class MouseListener {
         mouseButtonPressed = new boolean[3];
         mouseButtonFirstFramePressed = new boolean[3];
         isDragging = false;
+        isFirstPosUpdate = true;
     }
 
     public static void mousePosCallback(long window, double xPos, double yPos)
     {
-        getInstance().lastX = getInstance().xPos;
-        getInstance().lastY = getInstance().yPos;
+        getInstance().lastX = isFirstPosUpdate() ? xPos : getInstance().xPos;
+        getInstance().lastY = isFirstPosUpdate() ? yPos : getInstance().yPos;
         getInstance().xPos = xPos;
         getInstance().yPos = yPos;
         getInstance().isDragging = getInstance().mouseButtonPressed[0] || getInstance().mouseButtonPressed[1] || getInstance().mouseButtonPressed[2];
+        getInstance().isFirstPosUpdate = false;
     }
 
     public static void mouseButtonCallback(long window, int button, int action, int mods)
@@ -78,6 +81,8 @@ public class MouseListener {
     public static float getScrollY() { return (float)getInstance().scrollY; }
 
     public static boolean isDragging() { return getInstance().isDragging; }
+
+    public static boolean isFirstPosUpdate() { return getInstance().isFirstPosUpdate; }
 
     public static boolean mouseButtonHeldDown(int button)
     {

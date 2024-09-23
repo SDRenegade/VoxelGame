@@ -9,28 +9,28 @@ import java.util.List;
 
 public class GameObject {
     private String name;
-    private Transform transform;
     private List<Component> components;
 
     public GameObject(String name, boolean isGuiObject)
     {
         this.name = name;
-        this.transform = isGuiObject ? new RectTransform() : new Transform();
         components = new ArrayList<>();
+        Transform transform = isGuiObject ? new RectTransform() : new Transform();
+        addComponent(transform);
     }
 
     public GameObject(String name, Transform transform)
     {
         this.name = name;
-        this.transform = transform;
         components = new ArrayList<>();
+        addComponent(transform);
     }
 
     public GameObject(String name, RectTransform transform)
     {
         this.name = name;
-        this.transform = transform;
         components = new ArrayList<>();
+        addComponent(transform);
     }
 
     public <T extends Component> T getComponent(Class<T> componentClass)
@@ -69,7 +69,7 @@ public class GameObject {
     public void start()
     {
         for(int i = 0; i < components.size(); i++)
-            components.get(i).start();
+            components.get(i).start(this);
     }
 
     public void update(double dt)
@@ -81,7 +81,4 @@ public class GameObject {
     public String getName() { return name; }
 
     public void setName(String name) { this.name = name; }
-
-    public Transform getTransform() { return transform; }
-
 }

@@ -10,8 +10,8 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
-    private static final int DEFAULT_WINDOW_WIDTH = 960;
-    private static final int DEFAULT_WINDOW_HEIGHT = 540;
+    public static final int DEFAULT_WINDOW_WIDTH = 1920;
+    public static final int DEFAULT_WINDOW_HEIGHT = 1080;
 
     private static Window instance;
 
@@ -21,14 +21,13 @@ public class Window {
 
     private Window()
     {
-        width = DEFAULT_WINDOW_WIDTH;
-        height = DEFAULT_WINDOW_HEIGHT;
+        width = 960;
+        height = 540;
         title = "Voxel Game main.Window";
     }
 
     public void run()
     {
-        //System.out.println("Hello LWJGL Version " + Version.getVersion() + "!");
         init();
         loop();
 
@@ -87,7 +86,7 @@ public class Window {
 
         glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-        //glfwMaximizeWindow(glfwWindow);
+        glfwMaximizeWindow(glfwWindow);
 
         SceneManager.switchScene(0);
     }

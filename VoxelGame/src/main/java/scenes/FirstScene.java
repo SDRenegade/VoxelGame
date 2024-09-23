@@ -3,6 +3,8 @@ package scenes;
 import blocks.Block;
 import components.PlayerInteraction;
 import components.RectTransform;
+import util.Color32;
+import util.ShaderType;
 import window.GameObject;
 import components.Camera;
 import window.KeyListener;
@@ -15,8 +17,9 @@ import world.World;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 
 public class FirstScene extends Scene {
-    World world;
-    ChunkSystem chunkSystem;
+    private World world;
+    private ChunkSystem chunkSystem;
+
     public FirstScene() {}
 
     @Override
@@ -43,11 +46,18 @@ public class FirstScene extends Scene {
         addGameObjectToScene(player);
 
         GameObject crosshairs = new GameObject("Crosshairs",
-                new RectTransform(new Vector3f(), new Vector3f(), new Vector3f(1f, 1f, 1f), 20f, 20f, 0f, 0f));
-        UiRenderer uiRenderer = new UiRenderer();
-        crosshairs.addComponent(uiRenderer);
+                new RectTransform(25f, 25f, 0.5f, 0.5f));
+        UiRenderer rendererCrosshairs = new UiRenderer(
+                AssetPool.getInstance().getShader(ShaderType.UI), 0, new Color32(255, 255, 255, 255));
+        crosshairs.addComponent(rendererCrosshairs);
         addGameObjectToScene(crosshairs);
 
+        GameObject hotbarSlot1 = new GameObject("Hotbar Slot 1",
+                new RectTransform(new Vector3f(0f, 65f, 0f), new Vector3f(), new Vector3f(1f, 1f, 1f), 60f, 60f, 0.5f, 0f));
+        UiRenderer rendererHotbar1 = new UiRenderer(
+                AssetPool.getInstance().getShader(ShaderType.UI), -1, new Color32(100, 100, 100, 175));
+        hotbarSlot1.addComponent(rendererHotbar1);
+        addGameObjectToScene(hotbarSlot1);
 
         // Init ChunkSystem
         chunkSystem = new ChunkSystem(camera.getPos(), world);

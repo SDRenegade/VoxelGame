@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class RenderBatch {
-    public static final int POS_SIZE = 3;
+    /*public static final int POS_SIZE = 3;
     public static final int TEX_COORDS_SIZE = 3;
     public static final int POS_OFFSET = 0;
     public static final int TEX_COORDS_OFFSET = POS_SIZE * Float.BYTES + POS_OFFSET;
@@ -149,5 +149,5 @@ public class RenderBatch {
         elements[offsetArrayIndex + 5] = offset + 1;
     }
 
-    public boolean isFull() { return isFull; }
+    public boolean isFull() { return isFull; }*/
 }

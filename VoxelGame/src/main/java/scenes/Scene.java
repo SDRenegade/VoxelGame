@@ -27,7 +27,6 @@ public abstract class Scene {
         isRunning = true;
         for(GameObject go : gameObjects) {
             go.start();
-            renderer.add(go);
         }
     }
 
@@ -36,7 +35,6 @@ public abstract class Scene {
         gameObjects.add(go);
         if(isRunning) {
             go.start();
-            renderer.add(go);
         }
     }
 

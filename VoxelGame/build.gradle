@@ -23,8 +23,9 @@ project.ext.jomlVersion = "1.10.5"
 project.ext.lwjglNatives = "natives-windows"
 
 dependencies {
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
+    // LWJGL
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
     implementation "org.lwjgl:lwjgl"
     implementation "org.lwjgl:lwjgl-assimp"
     implementation "org.lwjgl:lwjgl-glfw"
@@ -40,7 +41,12 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
+
+    // JNoise
     implementation("de.articdive:jnoise-pipeline:4.1.0")
+
+    // Gson
+    implementation 'com.google.code.gson:gson:2.11.0'
 }
 
 jar {

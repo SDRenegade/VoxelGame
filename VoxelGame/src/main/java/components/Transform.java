@@ -12,7 +12,7 @@ public class Transform extends Component {
     {
         position = new Vector3f(0f, 0f, 0f);
         rotation = new Vector3f(0f, 0f, 0f);
-        scale = new Vector3f(0f, 0f, 0f);
+        scale = new Vector3f(1f, 1f, 1f);
     }
 
     public Transform(Vector3f position, Vector3f rotation, Vector3f scale)

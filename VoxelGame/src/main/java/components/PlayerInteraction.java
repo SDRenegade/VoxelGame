@@ -1,5 +1,6 @@
 package components;
 
+import window.GameObject;
 import window.MouseListener;
 import renderer.Shader;
 import scenes.SceneManager;
@@ -63,7 +64,7 @@ public class PlayerInteraction extends Component {
     private static final int COLOR_FACTOR_OFFSET = POS_SIZE * Float.BYTES + POS_OFFSET;
     private static final int VERTEX_SIZE = POS_SIZE + COLOR_FACTOR_SIZE;
     private static final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
-    private static final float DEFAULT_PLAYER_REACH = 5f;
+    private static final float DEFAULT_PLAYER_REACH = 5.5f;
 
     private Camera cam;
     private World world;
@@ -73,8 +74,10 @@ public class PlayerInteraction extends Component {
     private float[] vertices;
 
     @Override
-    public void start()
+    public void start(GameObject gameObject)
     {
+        this.gameObject = gameObject;
+
         playerReach = DEFAULT_PLAYER_REACH;
 
         shader = AssetPool.getInstance().getShader(ShaderType.BLOCK_OUTLINE);

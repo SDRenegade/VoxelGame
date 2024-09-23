@@ -20,6 +20,7 @@ public class Camera extends Component {
     private float lastX, lastY;
     private float mouseSensitivity;
 
+    private boolean isFirstUpdate;
     private float updateTimer = -1;
 
     public Camera()
@@ -33,6 +34,7 @@ public class Camera extends Component {
         lastX = 0;
         lastY = 0;
         mouseSensitivity = 0.07f;
+        isFirstUpdate = true;
     }
 
     @Override
@@ -52,6 +54,11 @@ public class Camera extends Component {
         if(KeyListener.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
             camPos.y -= camSpeed * dt;
 
+        if(isFirstUpdate && !MouseListener.isFirstPosUpdate()) {
+            lastX = MouseListener.getX();
+            lastY = MouseListener.getY();
+            isFirstUpdate = false;
+        }
         yaw += (MouseListener.getX() - lastX) * mouseSensitivity;
         lastX = MouseListener.getX();
         pitch += (lastY - MouseListener.getY()) * mouseSensitivity;

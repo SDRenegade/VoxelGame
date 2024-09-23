@@ -7,7 +7,10 @@ public abstract class Component {
 
     public Component() {}
 
-    public void start() {}
+    public void start(GameObject gameObject)
+    {
+        this.gameObject = gameObject;
+    }
 
     public void update(double dt) {}
 
