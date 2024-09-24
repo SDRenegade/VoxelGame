@@ -1,5 +1,6 @@
 package components;
 
+import gameobjects.GameObject;
 import window.Window;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -12,7 +13,7 @@ import window.MouseListener;
 import world.ChunkData;
 
 public class Camera extends Component {
-    private Vector3f camPos;
+    private Vector3f camPos; // TODO Remove and use gameObject transform position
     private Vector3f camForward;
     private Vector3f camUp;
     private float camSpeed;
@@ -30,11 +31,15 @@ public class Camera extends Component {
         camUp = new Vector3f(0f, 1f, 0f);
         camSpeed = 10f;
         yaw = -90;
-        pitch = 0;
-        lastX = 0;
-        lastY = 0;
+        pitch = lastX = lastY = 0;
         mouseSensitivity = 0.07f;
         isFirstUpdate = true;
+    }
+
+    @Override
+    public void start()
+    {
+        gameObject.getTransform().setPosition(0f, 155f, 3f);
     }
 
     @Override
@@ -76,7 +81,7 @@ public class Camera extends Component {
         // Print camera pos to console
         updateTimer -= dt;
         if(updateTimer < 0) {
-            System.out.println("Cam Position x: " + camPos.x + " y: " + camPos.y + " z: " + camPos.z);
+            //System.out.println("Cam Position x: " + camPos.x + " y: " + camPos.y + " z: " + camPos.z);
             int x = camPos.x >= 0 ? (int)(camPos.x / 16) : (int)(camPos.x / ChunkData.CHUNK_SIZE) - 1;
             int z = -64 >= 0 ? (int)(camPos.z / 16) : (int)(camPos.z / ChunkData.CHUNK_SIZE) - 1;
             //System.out.println("Chunk X: " + x + " Chunk Z: " + z);

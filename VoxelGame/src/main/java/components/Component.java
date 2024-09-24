@@ -1,16 +1,13 @@
 package components;
 
-import window.GameObject;
+import gameobjects.GameObject;
 
 public abstract class Component {
     protected GameObject gameObject;
 
     public Component() {}
 
-    public void start(GameObject gameObject)
-    {
-        this.gameObject = gameObject;
-    }
+    public void start() {}
 
     public void update(double dt) {}
 

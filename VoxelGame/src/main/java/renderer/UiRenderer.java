@@ -3,7 +3,6 @@ package renderer;
 import components.Component;
 import components.RectTransform;
 import util.*;
-import window.GameObject;
 import window.Window;
 
 import static org.lwjgl.opengl.GL15.*;
@@ -47,10 +46,8 @@ public class UiRenderer extends Component {
     }
 
     @Override
-    public void start(GameObject gameObject)
+    public void start()
     {
-        this.gameObject = gameObject;
-
         // Generate and bind a VAO
         vaoID = glGenVertexArrays();
         glBindVertexArray(vaoID);
@@ -76,8 +73,8 @@ public class UiRenderer extends Component {
         for(int i = 0; i < 4; i++) {
             float xPos = i <= 1 ? -rectTransform.getDimensions().x / 2 : rectTransform.getDimensions().x / 2;
             float yPos = i % 3 == 0 ? -rectTransform.getDimensions().y / 2 : rectTransform.getDimensions().y / 2;
-            vertices[i * VERTEX_SIZE] = (xPos / Window.DEFAULT_WINDOW_WIDTH * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + rectTransform.getAnchor().x) * 2 - 1;
-            vertices[i * VERTEX_SIZE + 1] = (yPos / Window.DEFAULT_WINDOW_HEIGHT * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + rectTransform.getAnchor().y) * 2 - 1;
+            vertices[i * VERTEX_SIZE] = (xPos / Window.DEFAULT_WINDOW_WIDTH * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + rectTransform.getAnchor().getX()) * 2 - 1;
+            vertices[i * VERTEX_SIZE + 1] = (yPos / Window.DEFAULT_WINDOW_HEIGHT * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + rectTransform.getAnchor().getY()) * 2 - 1;
 
             vertices[i * VERTEX_SIZE + 2] = TEXTURE_COORDS_ARRAY[i * 2];
             vertices[i * VERTEX_SIZE + 3] = TEXTURE_COORDS_ARRAY[i * 2 + 1];

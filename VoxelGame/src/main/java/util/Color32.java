@@ -3,6 +3,11 @@ package util;
 public class Color32 {
     public int r, g, b, a;
 
+    public Color32()
+    {
+        r = g = b = a = 255;
+    }
+
     public Color32(int r, int g, int b, int a)
     {
         setRed32(r);

@@ -4,8 +4,9 @@ import blocks.Block;
 import components.PlayerInteraction;
 import components.RectTransform;
 import util.Color32;
+import util.RectPivot;
 import util.ShaderType;
-import window.GameObject;
+import gameobjects.GameObject;
 import components.Camera;
 import window.KeyListener;
 import org.joml.Vector3f;
@@ -33,27 +34,26 @@ public class FirstScene extends Scene {
         world = new World();
 
         // Instantiate GameObjects into scene
-        GameObject cameraObj = new GameObject("Main Camera", false);
+        GameObject cameraObj = new GameObject(false);
         camera = new Camera();
         cameraObj.addComponent(camera);
         addGameObjectToScene(cameraObj);
 
-        GameObject player = new GameObject("Player", false);
+        GameObject player = new GameObject(false);
         PlayerInteraction playerInteraction = new PlayerInteraction();
         playerInteraction.setCamera(camera);
         playerInteraction.setWorld(world);
         player.addComponent(playerInteraction);
         addGameObjectToScene(player);
 
-        GameObject crosshairs = new GameObject("Crosshairs",
-                new RectTransform(25f, 25f, 0.5f, 0.5f));
+        GameObject crosshairs = new GameObject(new RectTransform(25f, 25f, RectPivot.CENTER, RectPivot.CENTER));
         UiRenderer rendererCrosshairs = new UiRenderer(
-                AssetPool.getInstance().getShader(ShaderType.UI), 0, new Color32(255, 255, 255, 255));
+                AssetPool.getInstance().getShader(ShaderType.UI), 0, new Color32());
         crosshairs.addComponent(rendererCrosshairs);
         addGameObjectToScene(crosshairs);
 
-        GameObject hotbarSlot1 = new GameObject("Hotbar Slot 1",
-                new RectTransform(new Vector3f(0f, 65f, 0f), new Vector3f(), new Vector3f(1f, 1f, 1f), 60f, 60f, 0.5f, 0f));
+        GameObject hotbarSlot1 = new GameObject(
+                new RectTransform(new Vector3f(0f, 50f, 0f), new Vector3f(), new Vector3f(1f, 1f, 1f), 70f, 70f, RectPivot.BOTTOM_CENTER, RectPivot.CENTER));
         UiRenderer rendererHotbar1 = new UiRenderer(
                 AssetPool.getInstance().getShader(ShaderType.UI), -1, new Color32(100, 100, 100, 175));
         hotbarSlot1.addComponent(rendererHotbar1);

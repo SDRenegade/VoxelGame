@@ -1,6 +1,6 @@
 package components;
 
-import window.GameObject;
+import gameobjects.GameObject;
 import window.MouseListener;
 import renderer.Shader;
 import scenes.SceneManager;
@@ -74,10 +74,8 @@ public class PlayerInteraction extends Component {
     private float[] vertices;
 
     @Override
-    public void start(GameObject gameObject)
+    public void start()
     {
-        this.gameObject = gameObject;
-
         playerReach = DEFAULT_PLAYER_REACH;
 
         shader = AssetPool.getInstance().getShader(ShaderType.BLOCK_OUTLINE);
