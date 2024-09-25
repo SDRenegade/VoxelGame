@@ -1,9 +1,11 @@
 package renderer;
 
-import components.Component;
-import components.RectTransform;
-import util.*;
+import components.*;
+import util.Color32;
 import window.Window;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
@@ -35,71 +37,87 @@ public class UiRenderer extends Component {
     private Shader shader;
     private int vaoID, vboID, eboID;
     private float[] vertices;
-    private int textureIndex;
-    private Color32 color;
+    private int[] indices;
+    private List<Float> vertexList;
+    private List<Integer> indexList;
 
-    public UiRenderer(Shader shader, int textureIndex, Color32 color)
+    public UiRenderer(Shader shader)
     {
         this.shader = shader;
-        this.textureIndex = textureIndex;
-        this.color = color;
+        vertexList = new ArrayList<>();
+        indexList = new ArrayList<>();
     }
 
     @Override
     public void start()
     {
-        // Generate and bind a VAO
+        // Generate buffers
         vaoID = glGenVertexArrays();
-        glBindVertexArray(vaoID);
-
-        updateVertexArray();
-
-        // Allocate space for the vertices
         vboID = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vboID);
-        glBufferData(GL_ARRAY_BUFFER, vertices.length * Float.BYTES, GL_DYNAMIC_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
-
-        // Create and upload indices buffer
         eboID = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, QUAD_ELEMENT_INDICES, GL_STATIC_DRAW);
     }
 
-    private void updateVertexArray()
+    private void updateVertices(Graphic graphic)
     {
         RectTransform rectTransform = gameObject.getComponent(RectTransform.class);
-        vertices = new float[4 * VERTEX_SIZE];
         for(int i = 0; i < 4; i++) {
             float xPos = i <= 1 ? -rectTransform.getDimensions().x / 2 : rectTransform.getDimensions().x / 2;
             float yPos = i % 3 == 0 ? -rectTransform.getDimensions().y / 2 : rectTransform.getDimensions().y / 2;
-            vertices[i * VERTEX_SIZE] = (xPos / Window.DEFAULT_WINDOW_WIDTH * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + rectTransform.getAnchor().getX()) * 2 - 1;
-            vertices[i * VERTEX_SIZE + 1] = (yPos / Window.DEFAULT_WINDOW_HEIGHT * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + rectTransform.getAnchor().getY()) * 2 - 1;
+            vertexList.add((xPos / Window.DEFAULT_WINDOW_WIDTH * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + rectTransform.getAnchor().getX()) * 2 - 1);
+            vertexList.add((yPos / Window.DEFAULT_WINDOW_HEIGHT * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + rectTransform.getAnchor().getY()) * 2 - 1);
 
-            vertices[i * VERTEX_SIZE + 2] = TEXTURE_COORDS_ARRAY[i * 2];
-            vertices[i * VERTEX_SIZE + 3] = TEXTURE_COORDS_ARRAY[i * 2 + 1];
-            vertices[i * VERTEX_SIZE + 4] = (float)textureIndex;
+            vertexList.add(TEXTURE_COORDS_ARRAY[i * 2]);
+            vertexList.add(TEXTURE_COORDS_ARRAY[i * 2 + 1]);
+            vertexList.add((float)graphic.getTextureIndex());
 
-            vertices[i * VERTEX_SIZE + 5] = color.getRed01();
-            vertices[i * VERTEX_SIZE + 6] = color.getGreen01();
-            vertices[i * VERTEX_SIZE + 7] = color.getBlue01();
-            vertices[i * VERTEX_SIZE + 8] = color.getAlpha01();
+            vertexList.add(graphic.getColor().getRed01());
+            vertexList.add(graphic.getColor().getGreen01());
+            vertexList.add(graphic.getColor().getBlue01());
+            vertexList.add(graphic.getColor().getAlpha01());
         }
+    }
+
+    private void updateIndices(int graphicCount)
+    {
+        for(int i = 0; i < QUAD_ELEMENT_INDICES.length; i++)
+            indexList.add(QUAD_ELEMENT_INDICES[i] + (4 * graphicCount));
     }
 
     @Override
     public void update(double dt)
     {
-        updateVertexArray();
+        int graphicCount = 0;
+        for(int i = 0; i < gameObject.getComponentList().size(); i++) {
+            if(gameObject.getComponentList().get(i) instanceof Graphic) {
+                Graphic graphic = (Graphic)(gameObject.getComponentList().get(i));
+                updateVertices(graphic);
+                updateIndices(graphicCount);
+                graphicCount++;
+            }
+        }
+
+        vertices = new float[vertexList.size()];
+        for(int i = 0; i < vertexList.size(); i++) {
+            vertices[i] = vertexList.get(i);
+        }
+        vertexList.clear();
+
+        indices = new int[indexList.size()];
+        for(int i = 0; i < indexList.size(); i++)
+            indices[i] = indexList.get(i);
+        indexList.clear();
 
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
         glBufferData(GL_ARRAY_BUFFER, vertices.length * Float.BYTES, GL_DYNAMIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, QUAD_ELEMENT_INDICES, GL_STATIC_DRAW);
     }
 
-    public void renderCrosshairs()
+    public void render()
     {
-        shader.use();;
+        shader.use();
         shader.loadUniform("textureArray", 1);
         RectTransform rectTransform = gameObject.getComponent(RectTransform.class);
         shader.loadUniform("transformationMatrix", rectTransform.getTransformationMatrix());

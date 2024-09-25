@@ -84,9 +84,9 @@ public class Window {
         // Enabling antialiasing
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        //glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-        glfwMaximizeWindow(glfwWindow);
+        //glfwMaximizeWindow(glfwWindow);
 
         SceneManager.switchScene(0);
     }

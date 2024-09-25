@@ -1,6 +1,7 @@
 package scenes;
 
 import blocks.Block;
+import components.Image;
 import components.PlayerInteraction;
 import components.RectTransform;
 import util.Color32;
@@ -47,16 +48,18 @@ public class FirstScene extends Scene {
         addGameObjectToScene(player);
 
         GameObject crosshairs = new GameObject(new RectTransform(25f, 25f, RectPivot.CENTER, RectPivot.CENTER));
-        UiRenderer rendererCrosshairs = new UiRenderer(
-                AssetPool.getInstance().getShader(ShaderType.UI), 0, new Color32());
-        crosshairs.addComponent(rendererCrosshairs);
+        UiRenderer chrosshairsRenderer = new UiRenderer(AssetPool.getInstance().getShader(ShaderType.UI));
+        crosshairs.addComponent(chrosshairsRenderer);
+        Image crosshairsImage = new Image(0);
+        crosshairs.addComponent(crosshairsImage);
         addGameObjectToScene(crosshairs);
 
         GameObject hotbarSlot1 = new GameObject(
                 new RectTransform(new Vector3f(0f, 50f, 0f), new Vector3f(), new Vector3f(1f, 1f, 1f), 70f, 70f, RectPivot.BOTTOM_CENTER, RectPivot.CENTER));
-        UiRenderer rendererHotbar1 = new UiRenderer(
-                AssetPool.getInstance().getShader(ShaderType.UI), -1, new Color32(100, 100, 100, 175));
+        UiRenderer rendererHotbar1 = new UiRenderer(AssetPool.getInstance().getShader(ShaderType.UI));
         hotbarSlot1.addComponent(rendererHotbar1);
+        Image hotbarSlot1Image = new Image(new Color32(100, 100, 100, 175), -1);
+        hotbarSlot1.addComponent(hotbarSlot1Image);
         addGameObjectToScene(hotbarSlot1);
 
         // Init ChunkSystem
@@ -82,7 +85,7 @@ public class FirstScene extends Scene {
         for(GameObject go : gameObjects) {
             if(go.getComponent(UiRenderer.class) != null) {
                 UiRenderer uiRenderer = go.getComponent(UiRenderer.class);
-                uiRenderer.renderCrosshairs();
+                uiRenderer.render();
             }
         }
     }

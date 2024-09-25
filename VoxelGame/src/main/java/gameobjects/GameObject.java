@@ -37,6 +37,20 @@ public class GameObject {
         addComponent(transform);
     }
 
+    public void start()
+    {
+        for(int i = 0; i < components.size(); i++) {
+            components.get(i).setGameObject(this);
+            components.get(i).start();
+        }
+    }
+
+    public void update(double dt)
+    {
+        for(int i = 0; i < components.size(); i++)
+            components.get(i).update(dt);
+    }
+
     public <T extends Component> T getComponent(Class<T> componentClass)
     {
         for(Component c : components) {
@@ -54,35 +68,23 @@ public class GameObject {
         return null;
     }
 
-    public <T extends Component> void removeComponent(Class<T> componentClass)
-    {
-        for(int i = 0; i < components.size(); i++) {;
-            if(componentClass.isAssignableFrom(components.get(i).getClass())) {
-                components.remove(i);
-                return ;
-            }
-        }
-    }
-
     public void addComponent(Component component)
     {
         components.add(component);
         component.setGameObject(this);
     }
 
-    public void start()
+    public <T extends Component> void removeComponent(Class<T> componentClass)
     {
-        for(int i = 0; i < components.size(); i++) {
-            components.get(i).setGameObject(this);
-            components.get(i).start();
+        for(int i = 0; i < components.size(); i++) {;
+            if(componentClass.isAssignableFrom(components.get(i).getClass())) {
+                components.remove(i);
+                return;
+            }
         }
     }
 
-    public void update(double dt)
-    {
-        for(int i = 0; i < components.size(); i++)
-            components.get(i).update(dt);
-    }
+    public List<Component> getComponentList() { return components; }
 
     public UUID getUUID() { return uuid; }
 
