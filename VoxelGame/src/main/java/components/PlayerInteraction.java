@@ -1,6 +1,9 @@
 package components;
 
 import gameobjects.GameObject;
+import listeners.PlayerInteractionEventArgs;
+import listeners.PlayerInteractionListener;
+import org.joml.Vector3f;
 import window.MouseListener;
 import renderer.Shader;
 import scenes.SceneManager;
@@ -8,7 +11,11 @@ import util.AssetPool;
 import util.ShaderType;
 import util.Vec3f;
 import util.Vec3i;
+import world.Location;
 import world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
@@ -66,12 +73,20 @@ public class PlayerInteraction extends Component {
     private static final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
     private static final float DEFAULT_PLAYER_REACH = 5.5f;
 
+
+
     private Camera cam;
     private World world;
     private float playerReach;
     private Shader shader;
     private int vaoID, vboID;
     private float[] vertices;
+    private List<PlayerInteractionListener> interactionListeners;
+
+    public PlayerInteraction()
+    {
+        interactionListeners = new ArrayList<>();
+    }
 
     @Override
     public void start()
@@ -95,10 +110,11 @@ public class PlayerInteraction extends Component {
                 (float)Math.sqrt(1 + Math.pow(cam.getForward().x / cam.getForward().z, 2) + Math.pow(cam.getForward().y / cam.getForward().z, 2))
         );
         // Coordinates of the block that the raycast is currently passing through
+        Vector3f camPos = cam.getGameObject().getTransform().getPosition();
         Vec3i worldCoords = new Vec3i(
-                cam.getPos().x >= 0 ? (int)cam.getPos().x : (int)cam.getPos().x - 1,
-                cam.getPos().y >= 0 ? (int)cam.getPos().y + 1 : (int)cam.getPos().y,
-                cam.getPos().z >= 0 ? (int)cam.getPos().z : (int)cam.getPos().z - 1
+                camPos.x >= 0 ? (int)camPos.x : (int)camPos.x - 1,
+                camPos.y >= 0 ? (int)camPos.y + 1 : (int)camPos.y,
+                camPos.z >= 0 ? (int)camPos.z : (int)camPos.z - 1
         );
         Vec3i previousPassCoords = new Vec3i();
         // Stores the length of each axis given their steps
@@ -108,29 +124,29 @@ public class PlayerInteraction extends Component {
         // Calculate the starting lengths of each axis
         if(cam.getForward().x >= 0) {
             step.x = 1;
-            rayLength1D.x = ((worldCoords.x + 1) - cam.getPos().x) * rayStepSize.x;
+            rayLength1D.x = ((worldCoords.x + 1) - camPos.x) * rayStepSize.x;
         }
         else {
             step.x = -1;
-            rayLength1D.x = (cam.getPos().x - worldCoords.x) * rayStepSize.x;
+            rayLength1D.x = (camPos.x - worldCoords.x) * rayStepSize.x;
         }
 
         if(cam.getForward().y >= 0) {
             step.y = 1;
-            rayLength1D.y = (worldCoords.y - cam.getPos().y) * rayStepSize.y;
+            rayLength1D.y = (worldCoords.y - camPos.y) * rayStepSize.y;
         }
         else {
             step.y = -1;
-            rayLength1D.y = (cam.getPos().y - (worldCoords.y - 1)) * rayStepSize.y;
+            rayLength1D.y = (camPos.y - (worldCoords.y - 1)) * rayStepSize.y;
         }
 
         if(cam.getForward().z >= 0) {
             step.z = 1;
-            rayLength1D.z = ((worldCoords.z + 1) - cam.getPos().z) * rayStepSize.z;
+            rayLength1D.z = ((worldCoords.z + 1) - camPos.z) * rayStepSize.z;
         }
         else {
             step.z = -1;
-            rayLength1D.z = (cam.getPos().z - worldCoords.z) * rayStepSize.z;
+            rayLength1D.z = (camPos.z - worldCoords.z) * rayStepSize.z;
         }
 
         previousPassCoords.copy(worldCoords);
@@ -160,8 +176,11 @@ public class PlayerInteraction extends Component {
         if(hitBlock != null && hitBlock != 0) {
             if(MouseListener.mouseButtonDown(0))
                 world.setBlock(worldCoords.x, worldCoords.y, worldCoords.z, (byte)0);
-            else if(MouseListener.mouseButtonDown(1) && previousPassCoords != null && world.getBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z) == 0)
-                world.setBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z, (byte)4);
+            else if(MouseListener.mouseButtonDown(1) && previousPassCoords != null && world.getBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z) == 0) {
+                invokeListeners(previousPassCoords);
+                //world.setBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z, (byte)4);
+            }
+
             else
                 renderBlockOutline(worldCoords);
         }
@@ -198,7 +217,7 @@ public class PlayerInteraction extends Component {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        glLineWidth(3f);
+        glLineWidth(4f);
 
         glDrawArrays(GL_LINES, 0, vertices.length / VERTEX_SIZE);
 
@@ -208,7 +227,27 @@ public class PlayerInteraction extends Component {
         shader.detach();
     }
 
-    public void setCamera(Camera cam) { this.cam = cam; }
+    public void setCamera(Camera cam) {
+        this.cam = cam;
+    }
 
-    public void setWorld(World world) { this.world = world; }
+    public void setWorld(World world) {
+        this.world = world;
+    }
+
+    public void invokeListeners(Vec3i interactionCoords) {
+        for(int i = 0; i < interactionListeners.size(); i++) {
+            PlayerInteractionEventArgs e = new PlayerInteractionEventArgs(
+                    new Location(world, interactionCoords.x,interactionCoords.y, interactionCoords.z));
+            interactionListeners.get(i).onPlayerInteraction(this, e);
+        }
+    }
+
+    public void addListener(PlayerInteractionListener listener) {
+        interactionListeners.add(listener);
+    }
+
+    public void removeListener(PlayerInteractionListener listener) {
+        interactionListeners.remove(listener);
+    }
 }

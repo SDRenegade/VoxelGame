@@ -1,7 +1,11 @@
 package renderer;
 
 import components.*;
-import util.Color32;
+import components.ui.Graphic;
+import components.ui.RectTransform;
+import gameobjects.GameObject;
+import org.joml.Vector2f;
+import util.RectPivot;
 import window.Window;
 
 import java.util.ArrayList;
@@ -41,30 +45,42 @@ public class UiRenderer extends Component {
     private List<Float> vertexList;
     private List<Integer> indexList;
 
-    public UiRenderer(Shader shader)
-    {
+    public UiRenderer(Shader shader) {
         this.shader = shader;
         vertexList = new ArrayList<>();
         indexList = new ArrayList<>();
     }
 
     @Override
-    public void start()
-    {
+    public void start() {
         // Generate buffers
         vaoID = glGenVertexArrays();
         vboID = glGenBuffers();
         eboID = glGenBuffers();
     }
 
-    private void updateVertices(Graphic graphic)
-    {
+    private void updateVertices(Graphic graphic) {
         RectTransform rectTransform = gameObject.getComponent(RectTransform.class);
         for(int i = 0; i < 4; i++) {
-            float xPos = i <= 1 ? -rectTransform.getDimensions().x / 2 : rectTransform.getDimensions().x / 2;
-            float yPos = i % 3 == 0 ? -rectTransform.getDimensions().y / 2 : rectTransform.getDimensions().y / 2;
-            vertexList.add((xPos / Window.DEFAULT_WINDOW_WIDTH * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + rectTransform.getAnchor().getX()) * 2 - 1);
-            vertexList.add((yPos / Window.DEFAULT_WINDOW_HEIGHT * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + rectTransform.getAnchor().getY()) * 2 - 1);
+            float xPos, yPos;
+            if(rectTransform.getPivot().getX() == 0f)
+                xPos = i <= 1 ? 0 : rectTransform.getDimensions().x;
+            else if(rectTransform.getPivot().getX() == 0.5f)
+                xPos = i <= 1 ? -rectTransform.getDimensions().x / 2 : rectTransform.getDimensions().x / 2;
+            else
+                xPos = i <= 1 ? -rectTransform.getDimensions().x : 0;
+
+            if(rectTransform.getPivot().getY() == 0f)
+                yPos = i % 3 == 0 ? 0 : rectTransform.getDimensions().y;
+            else if(rectTransform.getPivot().getY() == 0.5f)
+                yPos = i % 3 == 0 ? -rectTransform.getDimensions().y / 2 : rectTransform.getDimensions().y / 2;
+            else
+                yPos = i % 3 == 0 ? -rectTransform.getDimensions().y : 0;
+
+            Vector2f anchorActual = calculateAnchorPosition(gameObject.getParent(), rectTransform.getAnchor());
+
+            vertexList.add((xPos / Window.DEFAULT_WINDOW_WIDTH * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + anchorActual.x) * 2 - 1);
+            vertexList.add((yPos / Window.DEFAULT_WINDOW_HEIGHT * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + anchorActual.y) * 2 - 1);
 
             vertexList.add(TEXTURE_COORDS_ARRAY[i * 2]);
             vertexList.add(TEXTURE_COORDS_ARRAY[i * 2 + 1]);
@@ -77,15 +93,66 @@ public class UiRenderer extends Component {
         }
     }
 
-    private void updateIndices(int graphicCount)
-    {
+    // Does not factor in GameObjects scale or rotation
+    private Vector2f calculateAnchorPosition(GameObject parent, RectPivot childAnchorRelative) {
+        if(parent == null)
+            return new Vector2f(childAnchorRelative.getX(), childAnchorRelative.getY());
+
+        RectTransform parentTransform = (RectTransform)parent.getTransform();
+        Vector2f parentAnchorActual = calculateAnchorPosition(parent.getParent(), parentTransform.getPivot());
+
+        float xPositive, xNegative, yPositive, yNegative;
+        if(parentTransform.getPivot().getX() == 0f) {
+            xPositive = ((parentTransform.getDimensions().x + parentTransform.getPosition().x) / Window.DEFAULT_WINDOW_WIDTH) * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + parentAnchorActual.x;
+            xNegative = (parentTransform.getPosition().x / Window.DEFAULT_WINDOW_WIDTH) * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + parentAnchorActual.x;
+        }
+        else if(parentTransform.getPivot().getX() == 0.5f) {
+            xPositive = ((parentTransform.getDimensions().x / 2 + parentTransform.getPosition().x) / Window.DEFAULT_WINDOW_WIDTH) * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + parentAnchorActual.x;
+            xNegative = ((-parentTransform.getDimensions().x / 2 + parentTransform.getPosition().x) / Window.DEFAULT_WINDOW_WIDTH) * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + parentAnchorActual.x;
+        }
+        else {
+            xPositive = parentTransform.getPosition().x * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + parentAnchorActual.x;
+            xNegative = ((-parentTransform.getDimensions().x + parentTransform.getPosition().x) / Window.DEFAULT_WINDOW_WIDTH) * ((float)Window.DEFAULT_WINDOW_WIDTH / (float)Window.getInstance().getWidth()) + parentAnchorActual.x;
+        }
+
+        if(parentTransform.getPivot().getY() == 0f) {
+            yPositive = ((parentTransform.getDimensions().y + parentTransform.getPosition().y) / Window.DEFAULT_WINDOW_HEIGHT) * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + parentAnchorActual.y;
+            yNegative = (parentTransform.getPosition().y / Window.DEFAULT_WINDOW_HEIGHT) * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + parentAnchorActual.y;
+        }
+        else if(parentTransform.getPivot().getY() == 0.5f) {
+            yPositive = ((parentTransform.getDimensions().y / 2 + parentTransform.getPosition().y) / Window.DEFAULT_WINDOW_HEIGHT) * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + parentAnchorActual.y;
+            yNegative = ((-parentTransform.getDimensions().y / 2 + parentTransform.getPosition().y) / Window.DEFAULT_WINDOW_HEIGHT) * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + parentAnchorActual.y;
+        }
+        else {
+            yPositive = (parentTransform.getPosition().y / Window.DEFAULT_WINDOW_HEIGHT) * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + parentAnchorActual.y;
+            yNegative = ((-parentTransform.getDimensions().y + parentTransform.getPosition().y) / Window.DEFAULT_WINDOW_HEIGHT) * ((float)Window.DEFAULT_WINDOW_HEIGHT / (float)Window.getInstance().getHeight()) + parentAnchorActual.y;
+        }
+
+        Vector2f childAnchorActual = new Vector2f();
+        if(childAnchorRelative.getX() == 0f)
+            childAnchorActual.x = xNegative;
+        else if(childAnchorRelative.getX() == 0.5f)
+            childAnchorActual.x = xNegative + ((xPositive - xNegative) / 2);
+        else
+            childAnchorActual.x = xPositive;
+
+        if(childAnchorRelative.getY() == 0f)
+            childAnchorActual.y = yNegative;
+        else if(childAnchorRelative.getY() == 0.5f)
+            childAnchorActual.y = yNegative + ((yPositive - yNegative) / 2);
+        else
+            childAnchorActual.y = yPositive;
+
+        return childAnchorActual;
+    }
+
+    private void updateIndices(int graphicCount) {
         for(int i = 0; i < QUAD_ELEMENT_INDICES.length; i++)
             indexList.add(QUAD_ELEMENT_INDICES[i] + (4 * graphicCount));
     }
 
     @Override
-    public void update(double dt)
-    {
+    public void update(double dt) {
         int graphicCount = 0;
         for(int i = 0; i < gameObject.getComponentList().size(); i++) {
             if(gameObject.getComponentList().get(i) instanceof Graphic) {
@@ -115,8 +182,7 @@ public class UiRenderer extends Component {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, QUAD_ELEMENT_INDICES, GL_STATIC_DRAW);
     }
 
-    public void render()
-    {
+    public void render() {
         shader.use();
         shader.loadUniform("textureArray", 1);
         RectTransform rectTransform = gameObject.getComponent(RectTransform.class);

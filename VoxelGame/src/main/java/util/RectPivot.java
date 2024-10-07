@@ -13,13 +13,16 @@ public class RectPivot {
 
     private float xPos, yPos;
 
-    private RectPivot(float xPos, float yPos)
-    {
+    private RectPivot(float xPos, float yPos) {
         this.xPos = xPos;
         this.yPos = yPos;
     }
 
-    public float getX() { return xPos; }
+    public float getX() {
+        return xPos;
+    }
 
-    public float getY() { return yPos; }
+    public float getY() {
+        return yPos;
+    }
 }

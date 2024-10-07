@@ -18,8 +18,8 @@ public class World {
 
     public World()
     {
-        worldSeed = 2235417;
-        terrainDensitySeed = 23510231;
+        worldSeed = 121499;
+        terrainDensitySeed = 122799;
 
         worldNoise2D = new FastNoiseLite(worldSeed);
         worldNoise2D.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
@@ -94,6 +94,10 @@ public class World {
         int zPosInChunk = z - (chunkZ * ChunkData.CHUNK_SIZE);
 
         return containsChunk(chunkX, chunkZ) ? getChunk(chunkX, chunkZ).getChunkData().getBlock(xPosInChunk, y, zPosInChunk) : null;
+    }
+
+    public void setBlock(Location location, byte block) {
+        setBlock((int)location.getX(), (int)location.getY(), (int)location.getZ(), block);
     }
 
     // Given world coordinates, sets the given block type at the given location

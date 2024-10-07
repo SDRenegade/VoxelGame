@@ -1,4 +1,4 @@
-package components;
+package components.ui;
 
 import util.Color32;
 

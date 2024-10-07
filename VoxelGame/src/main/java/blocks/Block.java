@@ -51,25 +51,38 @@ public class Block {
             1.0f, 0.0f,
     };
 
+    public static final Block GRASS_BLOCK = new Block((byte)1, new BlockBuilder().setSideFaces(BlockTextures.GRASS_BLOCK_SIDE).setGivenFace(BlockFaces.TOP, BlockTextures.GRASS_BLOCK_TOP).setGivenFace(BlockFaces.BOTTOM, BlockTextures.DIRT));
+    public static final Block DIRT = new Block((byte)2, new BlockBuilder().setAllFaces(BlockTextures.DIRT));
+    public static final Block STONE = new Block((byte)3, new BlockBuilder().setAllFaces(BlockTextures.STONE));
+    public static final Block COBBLESTONE = new Block((byte)4, new BlockBuilder().setAllFaces(BlockTextures.COBBLESTONE));
+
     public static Map<Byte, Block> blockMap;
 
+    private byte blockID;
     protected BlockTextures[] faceTextures;
 
-    public Block(BlockBuilder blockBuilder)
+    private Block(byte blockID, BlockBuilder blockBuilder)
     {
+        this.blockID = blockID;
         faceTextures = blockBuilder.faceTextures;
     }
 
     public static void InitBlockMap()
     {
         blockMap = new HashMap<>();
-        blockMap.put((byte)1, new Block(new BlockBuilder().setSideFaces(BlockTextures.GRASS_BLOCK_SIDE).setGivenFace(BlockFaces.TOP, BlockTextures.GRASS_BLOCK_TOP).setGivenFace(BlockFaces.BOTTOM, BlockTextures.DIRT)));
-        blockMap.put((byte)2, new Block(new BlockBuilder().setAllFaces(BlockTextures.DIRT)));
-        blockMap.put((byte)3, new Block(new BlockBuilder().setAllFaces(BlockTextures.STONE)));
-        blockMap.put((byte)4, new Block(new BlockBuilder().setAllFaces(BlockTextures.COBBLESTONE)));
+        blockMap.put(GRASS_BLOCK.blockID, GRASS_BLOCK);
+        blockMap.put(DIRT.blockID, DIRT);
+        blockMap.put(STONE.blockID, STONE);
+        blockMap.put(COBBLESTONE.blockID, COBBLESTONE);
     }
 
-    public BlockTextures[] getFaceTextures() { return faceTextures; }
+    public byte getBlockID() {
+        return blockID;
+    }
+
+    public BlockTextures[] getFaceTextures() {
+        return faceTextures;
+    }
 
     public static class BlockBuilder
     {
@@ -99,7 +112,6 @@ public class Block {
         public BlockBuilder setGivenFace(BlockFaces face, BlockTextures blockTexture)
         {
             faceTextures[face.getFaceIndex()] = blockTexture;
-
             return this;
         }
     }

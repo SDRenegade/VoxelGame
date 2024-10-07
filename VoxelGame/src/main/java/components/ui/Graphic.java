@@ -1,5 +1,6 @@
-package components;
+package components.ui;
 
+import components.Component;
 import util.Color32;
 
 public abstract class Graphic extends Component {

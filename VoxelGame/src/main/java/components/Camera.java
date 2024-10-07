@@ -13,7 +13,6 @@ import window.MouseListener;
 import world.ChunkData;
 
 public class Camera extends Component {
-    private Vector3f camPos; // TODO Remove and use gameObject transform position
     private Vector3f camForward;
     private Vector3f camUp;
     private float camSpeed;
@@ -26,7 +25,6 @@ public class Camera extends Component {
 
     public Camera()
     {
-        camPos = new Vector3f(0f, 155f, 3f);
         camForward = new Vector3f(0f, 0f, -1f);
         camUp = new Vector3f(0f, 1f, 0f);
         camSpeed = 10f;
@@ -37,14 +35,13 @@ public class Camera extends Component {
     }
 
     @Override
-    public void start()
-    {
-        gameObject.getTransform().setPosition(0f, 155f, 3f);
-    }
+    public void start() {}
 
     @Override
     public void update(double dt)
     {
+        Vector3f camPos = gameObject.getTransform().getPosition();
+
         if(KeyListener.isKeyPressed(GLFW_KEY_W))
             camPos.add(new Vector3f(camForward.x, 0f, camForward.z).normalize().mul((float)(camSpeed * dt)));
         if(KeyListener.isKeyPressed(GLFW_KEY_S))
@@ -79,19 +76,15 @@ public class Camera extends Component {
         camForward = dir.normalize();
 
         // Print camera pos to console
-        updateTimer -= dt;
+        /*updateTimer -= dt;
         if(updateTimer < 0) {
-            //System.out.println("Cam Position x: " + camPos.x + " y: " + camPos.y + " z: " + camPos.z);
+            System.out.println("Cam Position x: " + camPos.x + " y: " + camPos.y + " z: " + camPos.z);
             int x = camPos.x >= 0 ? (int)(camPos.x / 16) : (int)(camPos.x / ChunkData.CHUNK_SIZE) - 1;
             int z = -64 >= 0 ? (int)(camPos.z / 16) : (int)(camPos.z / ChunkData.CHUNK_SIZE) - 1;
-            //System.out.println("Chunk X: " + x + " Chunk Z: " + z);
+            System.out.println("Chunk X: " + x + " Chunk Z: " + z);
             updateTimer = 0.35f;
-        }
+        }*/
     }
-
-    public Vector3f getPos() { return camPos; }
-
-    public void setPos(Vector3f camPos) { this.camPos = camPos; }
 
     public Vector3f getForward() { return camForward; }
 
@@ -119,6 +112,7 @@ public class Camera extends Component {
 
     public Matrix4f getViewMatrix()
     {
+        Vector3f camPos = gameObject.getTransform().getPosition();
         return new Matrix4f().lookAt(camPos, new Vector3f(camPos.x + camForward.x, camPos.y + camForward.y, camPos.z + camForward.z), camUp);
     }
 
