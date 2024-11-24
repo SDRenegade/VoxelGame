@@ -33,16 +33,14 @@ public class ChunkRenderer {
     private List<Float> vertexList;
     private boolean isInitialized;
 
-    public ChunkRenderer(Chunk chunk, World world)
-    {
+    public ChunkRenderer(Chunk chunk, World world) {
         this.chunk = chunk;
         this.world = world;
         isInitialized = false;
         vertexList = new ArrayList<>();
     }
 
-    public void updateChunkMesh(ChunkSystem chunkSystem)
-    {
+    public void updateChunkMesh(ChunkSystem chunkSystem) {
         for(int y = 0; y < ChunkData.CHUNK_HEIGHT; y++) {
             for(int z = 0; z < ChunkData.CHUNK_SIZE; z++) {
                 for(int x = 0; x < ChunkData.CHUNK_SIZE; x++) {
@@ -110,8 +108,7 @@ public class ChunkRenderer {
         start();
     }
 
-    public void start()
-    {
+    public void start() {
         // Allocate space for the vertices
         vboID = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
@@ -127,8 +124,7 @@ public class ChunkRenderer {
         isInitialized = true;
     }
 
-    public void render()
-    {
+    public void render() {
         if(!isInitialized)
             return;
 
@@ -154,8 +150,7 @@ public class ChunkRenderer {
         glDisableVertexAttribArray(3);
     }
 
-    private void addFaceToVertexArray(int faceIndex, Chunk chunk, int chunkX, int chunkY, int chunkZ)
-    {
+    private void addFaceToVertexArray(int faceIndex, Chunk chunk, int chunkX, int chunkY, int chunkZ) {
         int[] aoIDs = calculateAmbientOcclusionIDs(world, faceIndex, chunk, chunkX, chunkY, chunkZ);
 
         int faceOffset = faceIndex * 3 * 4;
@@ -176,8 +171,7 @@ public class ChunkRenderer {
         aoIDs = null;
     }
 
-    private int[] calculateAmbientOcclusionIDs(World world, int faceIndex, Chunk chunk, int x, int y, int z)
-    {
+    private int[] calculateAmbientOcclusionIDs(World world, int faceIndex, Chunk chunk, int x, int y, int z) {
         int[] aoIDs = new int[4];
 
         int worldX = chunk.getChunkData().getXPos() * ChunkData.CHUNK_SIZE + x;
@@ -398,8 +392,7 @@ public class ChunkRenderer {
         return aoIDs;
     }
 
-    private int[] generateIndices()
-    {
+    private int[] generateIndices() {
         int indicesPerQuad = 6;
         int numQuads = vertices.length / indicesPerQuad / 4;
         int[] elements = new int[numQuads * indicesPerQuad];
@@ -409,8 +402,7 @@ public class ChunkRenderer {
         return elements;
     }
 
-    private void loadElementIndices(int[] elements, int index)
-    {
+    private void loadElementIndices(int[] elements, int index) {
         int offsetArrayIndex = index * 6;
         int offset = index * 4;
 
@@ -426,11 +418,12 @@ public class ChunkRenderer {
         elements[offsetArrayIndex + 5] = offset + 1;
     }
 
-    public void dispose()
-    {
+    public void dispose() {
         glDeleteBuffers(vboID);
         glDeleteBuffers(eboID);
     }
 
-    public Chunk getChunk() { return chunk; }
+    public Chunk getChunk() {
+        return chunk;
+    }
 }

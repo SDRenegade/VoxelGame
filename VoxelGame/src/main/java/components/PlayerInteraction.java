@@ -73,8 +73,6 @@ public class PlayerInteraction extends Component {
     private static final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
     private static final float DEFAULT_PLAYER_REACH = 5.5f;
 
-
-
     private Camera cam;
     private World world;
     private float playerReach;
@@ -83,14 +81,12 @@ public class PlayerInteraction extends Component {
     private float[] vertices;
     private List<PlayerInteractionListener> interactionListeners;
 
-    public PlayerInteraction()
-    {
+    public PlayerInteraction() {
         interactionListeners = new ArrayList<>();
     }
 
     @Override
-    public void start()
-    {
+    public void start() {
         playerReach = DEFAULT_PLAYER_REACH;
 
         shader = AssetPool.getInstance().getShader(ShaderType.BLOCK_OUTLINE);
@@ -102,8 +98,7 @@ public class PlayerInteraction extends Component {
 
 
     @Override
-    public void update(double dt)
-    {
+    public void update(double dt) {
         Vec3f rayStepSize = new Vec3f(
                 (float)Math.sqrt(1 + Math.pow(cam.getForward().y / cam.getForward().x, 2) + Math.pow(cam.getForward().z / cam.getForward().x, 2)),
                 (float)Math.sqrt(1 + Math.pow(cam.getForward().x / cam.getForward().y, 2) + Math.pow(cam.getForward().z / cam.getForward().y, 2)),
@@ -180,14 +175,12 @@ public class PlayerInteraction extends Component {
                 invokeListeners(previousPassCoords);
                 //world.setBlock(previousPassCoords.x, previousPassCoords.y, previousPassCoords.z, (byte)4);
             }
-
             else
                 renderBlockOutline(worldCoords);
         }
     }
 
-    private void renderBlockOutline(Vec3i worldCoords)
-    {
+    private void renderBlockOutline(Vec3i worldCoords) {
         vertices = new float[24 * VERTEX_SIZE];
         for(int i = 0; i < 24; i++) {
             vertices[i * VERTEX_SIZE] = CUBE_OUTLINE_VERTEX_POSITIONS[i * 3] + worldCoords.x;
@@ -203,17 +196,16 @@ public class PlayerInteraction extends Component {
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
 
         shader.use();
-        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
         shader.loadUniform("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
+        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
         shader.loadUniform("sysTime", System.currentTimeMillis() % 10000000);
-
         glBindVertexArray(vaoID);
 
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
-        // Enable buffer attribute pointers
         glVertexAttribPointer(0, POS_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, POS_OFFSET);
         glVertexAttribPointer(1, COLOR_FACTOR_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, COLOR_FACTOR_OFFSET);
+
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
@@ -223,6 +215,7 @@ public class PlayerInteraction extends Component {
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+
         glBindVertexArray(0);
         shader.detach();
     }

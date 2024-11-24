@@ -10,8 +10,6 @@ import util.ShaderType;
 import java.util.*;
 
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
@@ -25,8 +23,7 @@ public class ChunkSystem {
     private Shader shader;
     private int vaoID;
 
-    public ChunkSystem(Vector3f camPos, World world)
-    {
+    public ChunkSystem(Vector3f camPos, World world) {
         chunkRenderers = new HashMap<>();
         this.camPos = camPos;
         this.world = world;
@@ -38,8 +35,7 @@ public class ChunkSystem {
         glBindVertexArray(vaoID);
     }
 
-    public void update(double dt)
-    {
+    public void update(double dt) {
         int currentChunkX = world.getChunkPos(camPos.x);
         int currentChunkZ = world.getChunkPos(camPos.z);
         // Remove any chunks no longer in render distance
@@ -73,8 +69,7 @@ public class ChunkSystem {
         //System.out.println("Render fps: " + (1 / (endTime - beginTime)));
     }
 
-    public void addChunkRenderer(Chunk chunk)
-    {
+    public void addChunkRenderer(Chunk chunk) {
         if(chunkRenderers.containsKey(chunk.getChunkID()))
             return;
 
@@ -84,8 +79,7 @@ public class ChunkSystem {
         setNeighboringChunkRenderersDirty(chunk);
     }
 
-    public void updateChunkMeshes()
-    {
+    public void updateChunkMeshes() {
         List<ChunkRenderer> nearestDirtyRenderers = new ArrayList<>();
         for (Map.Entry<Long, ChunkRenderer> rendererEntry : chunkRenderers.entrySet()) {
             if (!rendererEntry.getValue().getChunk().isDirty())
@@ -103,49 +97,34 @@ public class ChunkSystem {
             }
         }
 
-        int chunkMeshUpdatesThisFrame = 0;
-        for (int i = 0; i < nearestDirtyRenderers.size(); i++) {
+        for (int i = 0; i < nearestDirtyRenderers.size(); i++)
             nearestDirtyRenderers.get(i).updateChunkMesh(this);
-            chunkMeshUpdatesThisFrame++;
-        }
-        //System.out.println("Chunk Mesh Updates this frame: " + chunkMeshUpdatesThisFrame);
     }
 
-    public Chunk getChunkFromRenderer(int xPos, int zPos)
-    {
+    public Chunk getChunkFromRenderer(int xPos, int zPos) {
         ChunkRenderer chunkRenderer = chunkRenderers.get(Chunk.generateChunkID(xPos, zPos));
         return chunkRenderer != null ? chunkRenderer.getChunk() : null;
     }
 
-    public boolean containsChunk(int xPos, int zPos)
-    {
+    public boolean containsChunk(int xPos, int zPos) {
         return chunkRenderers.containsKey(Chunk.generateChunkID(xPos, zPos));
     }
 
-    public void render()
-    {
+    public void render() {
         shader.use();
         shader.loadUniform("textureArray", 0);
-        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
         shader.loadUniform("view", SceneManager.getCurrentScene().getCamera().getViewMatrix());
-
+        shader.loadUniform("projection", SceneManager.getCurrentScene().getCamera().getProjectionMatrix());
         glBindVertexArray(vaoID);
 
-        int drawCallsPerFrame = 0;
-        for(Map.Entry<Long, ChunkRenderer> renderer : chunkRenderers.entrySet()) {
+        for(Map.Entry<Long, ChunkRenderer> renderer : chunkRenderers.entrySet())
             renderer.getValue().render();
-            drawCallsPerFrame++;
-        }
-
-        //System.out.println("Draw Calls this frame: " + drawCallsPerFrame);
 
         glBindVertexArray(0);
-
         shader.detach();
     }
 
-    private float playerDistanceToChunk(Chunk chunk)
-    {
+    private float playerDistanceToChunk(Chunk chunk) {
         float xDis = 0;
         float zDis = 0;
         if(camPos.x > chunk.getChunkData().getXPos() * ChunkData.CHUNK_SIZE + ChunkData.CHUNK_SIZE)
@@ -161,8 +140,7 @@ public class ChunkSystem {
         return (float)Math.sqrt(Math.pow(xDis, 2) + Math.pow(zDis, 2));
     }
 
-    private void setNeighboringChunkRenderersDirty(Chunk chunk)
-    {
+    private void setNeighboringChunkRenderersDirty(Chunk chunk) {
         // +X Neighbor
         if(containsChunk(chunk.getChunkData().getXPos() + 1, chunk.getChunkData().getZPos()))
             chunkRenderers.get(Chunk.generateChunkID(chunk.getChunkData().getXPos() + 1, chunk.getChunkData().getZPos())).getChunk().setDirty(true);
